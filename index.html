@@ -233,7 +233,7 @@
                             <tr>
                                 <th class="py-2 px-3 w-10 text-center border-b-2 border-slate-300">No</th>
                                 <th class="py-2 px-3 border-b-2 border-slate-300">Nama Peralatan</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Jenis / Model</th>
+                                <th class="py-2 px-3 border-b-2 border-slate-300">Jenis / Jenama / Model</th>
                                 <th class="py-2 px-3 text-center border-b-2 border-slate-300">Tahun (Usia)</th>
                                 <th class="py-2 px-3 border-b-2 border-slate-300">Lokasi</th>
                                 <th class="py-2 px-3 text-center border-b-2 border-slate-300">Kuantiti</th>
@@ -570,10 +570,10 @@
         async function loadData() {
             try {
                 const tbody = document.getElementById('table-body');
-                if(tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuatkan data dari Google Sheets...</td></tr>`;
+                if(tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>MEMUATKAN DATA DARI GOOGLE SHEETS...</td></tr>`;
                 
                 if(GOOGLE_SCRIPT_URL === 'SILA_LETAK_URL_WEB_APP_DI_SINI' || GOOGLE_SCRIPT_URL === '') {
-                    throw new Error("Sila masukkan URL Web App");
+                    throw new Error("URL WEB APP TIDAK DIJUMPAI");
                 }
 
                 const res = await fetch(GOOGLE_SCRIPT_URL, {
@@ -582,7 +582,7 @@
                 });
                 
                 if (!res.ok) {
-                    throw new Error("HTTP Status " + res.status);
+                    throw new Error("HTTP STATUS " + res.status + " - MUNGKIN ISU PERMISSIONS (ANYONE)");
                 }
 
                 const data = await res.json();
@@ -613,8 +613,8 @@
                 renderApp();
             } catch (err) {
                 console.error("Fetch Error:", err);
-                const errMsg = "Gagal memuat turun data dari Google Sheets (Isu CORS/Pautan). Sistem kini bertukar ke Mod Demo (Data Lokal).";
-                showMsg("Mod Demo Diaktifkan", errMsg, "info");
+                const errMsg = "GAGAL BERHUBUNG DENGAN GOOGLE SHEETS. PUNCA: " + err.message + ". PASTIKAN APPS SCRIPT DI-DEPLOY KEPADA 'ANYONE'. SISTEM KINI BERTUKAR KE MOD DEMO (DATA LOKAL).";
+                showMsg("MOD DEMO AKTIF", errMsg, "error");
                 
                 // Masukkan data contoh (Fallback) supaya sistem tidak tersekat
                 isDemoMode = true;
@@ -760,7 +760,7 @@
                     <td class="py-2 px-3 font-black text-black">${escapeHTML(a.nama_peralatan)}</td>
                     <td class="py-2 px-3">
                         <div class="text-[9px] text-slate-500 font-bold">${escapeHTML(a.jenis_harta || '-')}</div>
-                        <div class="font-extrabold text-slate-800">${escapeHTML(a.model)}</div>
+                        <div class="font-extrabold text-slate-800 uppercase">${escapeHTML(a.jenama || '-')} <span class="text-slate-400 mx-1 font-normal">/</span> ${escapeHTML(a.model || '-')}</div>
                     </td>
                     <td class="py-2 px-3 text-center">
                         <span class="block font-black text-black">${a.tahun_perolehan}</span>
