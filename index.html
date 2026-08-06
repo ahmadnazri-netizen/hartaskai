@@ -234,6 +234,7 @@
                                 <th class="py-2 px-3 w-10 text-center border-b-2 border-slate-300">No</th>
                                 <th class="py-2 px-3 border-b-2 border-slate-300">Nama Peralatan</th>
                                 <th class="py-2 px-3 border-b-2 border-slate-300">Jenis / Jenama / Model</th>
+                                <th class="py-2 px-3 border-b-2 border-slate-300">Nombor Siri</th>
                                 <th class="py-2 px-3 text-center border-b-2 border-slate-300">Tahun (Usia)</th>
                                 <th class="py-2 px-3 border-b-2 border-slate-300">Lokasi</th>
                                 <th class="py-2 px-3 text-center border-b-2 border-slate-300">Kuantiti</th>
@@ -243,7 +244,7 @@
                         </thead>
                         <tbody id="table-body" class="divide-y divide-slate-100">
                             <!-- Rows populated dynamically -->
-                            <tr><td colspan="8" class="text-center py-6 text-slate-400 font-medium text-xs">Memuatkan data...</td></tr>
+                            <tr><td colspan="9" class="text-center py-6 text-slate-400 font-medium text-xs">Memuatkan data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -730,7 +731,7 @@
             adminCols.forEach(col => isAdmin ? col.classList.remove('hidden') : col.classList.add('hidden'));
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${isAdmin ? 8 : 7}" class="text-center py-8 text-slate-500">Tiada rekod harta dijumpai.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${isAdmin ? 9 : 8}" class="text-center py-8 text-slate-500">Tiada rekod harta dijumpai.</td></tr>`;
                 return;
             }
 
@@ -763,6 +764,7 @@
                         <div class="text-[9px] text-slate-500">${escapeHTML(a.jenis_harta || '-')}</div>
                         <div class="text-slate-800 uppercase">${escapeHTML(a.jenama || '-')} <span class="text-slate-400 mx-1">/</span> ${escapeHTML(a.model || '-')}</div>
                     </td>
+                    <td class="py-2 px-3 text-slate-700">${escapeHTML(a.nombor_siri || '-')}</td>
                     <td class="py-2 px-3 text-center">
                         <span class="block text-black">${a.tahun_perolehan}</span>
                         <span class="text-[9px] text-slate-400">(${age} THN)</span>
