@@ -3,1416 +3,878 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Daftar Harta Modal</title>
-    
+    <title>Sistem Pendaftaran Harta Modal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Paksa hampir semua elemen paparan menjadi huruf besar */
-        body, div, p, span, h1, h2, h3, h4, h5, h6, th, td, button, a, label, option {
-            text-transform: uppercase !important;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #0f172a; /* Slate 900 for external background */
-            min-height: 100vh;
-            margin: 0;
-            padding: 1rem; /* Ruang bernafas untuk semua skrin */
-        }
-
-        /* CUSTOM OVERRIDES: KONTRA TINGGI & SAIZ FON KECIL */
-        label {
-            font-size: 10px !important;
-            font-weight: normal !important;
-            color: #0f172a !important; /* Slate 900 */
-            letter-spacing: 0.05em;
-        }
-        input, select, textarea {
-            font-size: 11px !important;
-            font-weight: normal !important; 
-            color: #000000 !important; /* Black */
-            background-color: #f8fafc !important; 
-            border-color: #cbd5e1 !important;
-            text-transform: uppercase !important;
-        }
-        input::placeholder, textarea::placeholder {
-            text-transform: uppercase !important;
-            color: #94a3b8 !important;
-        }
-        input:focus, select:focus, textarea:focus {
-            background-color: #ffffff !important;
-            border-color: #3b82f6 !important;
-        }
-        th {
-            font-size: 11px !important;
-            font-weight: bold !important; 
-            color: #000000 !important;
-            background-color: #e2e8f0 !important; /* Slate 200 */
-            letter-spacing: 0.02em;
-        }
-
-        /* Container responsif sepenuhnya tanpa had aspect-ratio */
-        .dashboard-container {
-            width: 100%;
-            max-width: 1600px;
-            margin: 0 auto; /* Tengah secara horizontal */
-            background-color: #f8fafc; /* Slate 50 */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-radius: 1rem;
-            overflow: hidden; /* Potong penjuru supaya bulat */
-            display: flex;
-            flex-direction: column;
-            min-height: 90vh; /* Minimum tinggi untuk rupa yang baik */
-            height: auto;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        body { font-family: 'Arial', sans-serif; }
+        .uppercase { text-transform: uppercase; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Print Styles */
+        .no-print { display: block; }
         @media print {
-            body { background: white; align-items: flex-start; justify-content: flex-start; }
-            .dashboard-container { 
-                aspect-ratio: auto; box-shadow: none; max-width: 100%; 
-                height: auto; overflow: visible; border-radius: 0;
-            }
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .print-table { width: 100%; border-collapse: collapse; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 12px; }
-            .print-header { text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 18px; }
+            body { background-color: white; }
+            .print-container { width: 100%; margin: 0; padding: 0; box-shadow: none; border: none; }
         }
-        
-        .print-only { display: none; }
     </style>
 </head>
-<body class="antialiased uppercase text-xs text-slate-700 font-normal">
-
-    <div class="dashboard-container no-print" id="app-container">
-        
-        <!-- Header / Navigation -->
-        <header class="bg-slate-900 text-white px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center shrink-0 gap-4 md:gap-0 border-b-4 border-blue-600">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i class="fa-solid fa-boxes-stacked text-xl"></i>
+<body class="bg-slate-100 min-h-screen text-slate-800 uppercase text-sm">
+    <div class="bg-slate-800 text-white p-4 shadow-md no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-boxes-stacked text-2xl text-blue-400"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider">DAFTAR HARTA MODAL</h1>
+                    <p class="text-xs text-slate-400">Sistem Pengurusan Aset</p>
                 </div>
-                <h1 class="text-base md:text-lg font-extrabold tracking-widest text-center md:text-left text-white drop-shadow-md">SISTEM DAFTAR HARTA MODAL</h1>
             </div>
-            
-            <div class="flex items-center gap-2 md:gap-4 flex-wrap justify-center">
-                <!-- Navigation Tabs -->
-                <div class="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
-                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-3 py-2 rounded-md bg-blue-600 text-white font-extrabold text-[11px] transition-all shadow-md tracking-wide">
-                        <i class="fa-solid fa-chart-pie mr-1"></i> Dashboard
-                    </button>
-                    <button onclick="switchTab('registration')" id="tab-registration" class="px-3 py-2 rounded-md text-slate-400 hover:text-white font-bold text-[11px] transition-all tracking-wide">
-                        <i class="fa-solid fa-clipboard-list mr-1"></i> Pendaftaran
-                    </button>
-                    <button onclick="switchTab('pinjaman')" id="tab-pinjaman" class="px-3 py-2 rounded-md text-slate-400 hover:text-white font-bold text-[11px] transition-all tracking-wide">
-                        <i class="fa-solid fa-handshake mr-1"></i> Pinjaman
-                    </button>
-                </div>
-
-                <div class="h-6 w-px bg-slate-700 mx-1 hidden sm:block"></div>
-
-                <!-- Admin & Actions -->
-                <button onclick="openPrintModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-md text-xs font-bold transition-all border border-slate-700 text-slate-300 hover:text-white" title="Cetak Senarai">
-                    <i class="fa-solid fa-print"></i>
+            <div class="flex gap-2">
+                <button id="btn-admin" onclick="checkAdmin()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-md font-bold text-xs hover:bg-slate-300 transition-colors">
+                    <i class="fa-solid fa-lock mr-1"></i> MOD ADMIN
                 </button>
-                <button onclick="exportToCSV()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-md text-xs font-bold transition-all border border-slate-700 text-slate-300 hover:text-white" title="Muat Turun CSV">
-                    <i class="fa-solid fa-file-csv"></i>
-                </button>
-                <button onclick="toggleAdminLogin()" id="btn-admin" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-md text-xs font-bold transition-all flex items-center gap-2 text-slate-300">
-                    <i class="fa-solid fa-lock text-slate-500" id="icon-admin"></i>
-                    <span id="text-admin" class="hidden sm:inline">Log Masuk</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- VIEW: DASHBOARD -->
-        <main id="view-dashboard" class="flex flex-col p-4 md:p-6 bg-slate-50 w-full">
-            
-            <!-- Key Metrics -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5 w-full">
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-cube"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-500 tracking-wider uppercase mb-1">Jumlah Keseluruhan</p>
-                        <h3 class="text-2xl font-bold text-black" id="stat-total">0</h3>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-check-circle"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-500 tracking-wider uppercase mb-1">Berfungsi</p>
-                        <h3 class="text-2xl font-bold text-black" id="stat-working">0</h3>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-500 tracking-wider uppercase mb-1">Rosak</p>
-                        <h3 class="text-2xl font-bold text-black" id="stat-broken">0</h3>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-500 tracking-wider uppercase mb-1">Lupus</p>
-                        <h3 class="text-2xl font-bold text-black" id="stat-lupus">0</h3>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 flex items-center justify-between col-span-2 md:col-span-1 lg:col-span-1">
-                    <div class="w-full">
-                        <p class="text-[10px] text-slate-500 tracking-wider uppercase mb-1">Nilai Harta</p>
-                        <h3 class="text-xl font-bold text-black truncate" id="stat-value">RM 0.00</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts & Filters -->
-            <div class="flex flex-col lg:flex-row gap-4 mb-5 w-full">
-                <!-- Chart: Jenis Harta -->
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 w-full lg:w-1/3 flex flex-col min-h-[220px]">
-                    <h4 class="text-[11px] font-extrabold text-black mb-3 uppercase tracking-wide">Analisa Jenis Harta</h4>
-                    <div class="flex-1 relative w-full h-full">
-                        <canvas id="chartJenis"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Chart: Status -->
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 w-full lg:w-1/3 flex flex-col min-h-[220px]">
-                    <h4 class="text-[11px] font-extrabold text-black mb-3 uppercase tracking-wide">Status Harta</h4>
-                    <div class="flex-1 relative w-full h-full">
-                        <canvas id="chartStatus"></canvas>
-                    </div>
-                </div>
-
-                <!-- Filters -->
-                <div class="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-4 w-full lg:w-1/3 flex flex-col justify-center">
-                    <h4 class="text-[11px] font-extrabold text-black mb-3 uppercase tracking-wide"><i class="fa-solid fa-filter mr-2 text-slate-400"></i>Tapis Maklumat</h4>
-                    
-                    <div class="space-y-2">
-                        <select id="filter-lokasi" onchange="renderTable()" class="w-full">
-                            <option value="ALL">Semua Lokasi</option>
-                            <!-- Options populated dynamically -->
-                        </select>
-                        <select id="filter-jenis" onchange="renderTable()" class="w-full">
-                            <option value="ALL">Semua Jenis Harta</option>
-                            <!-- Options populated dynamically -->
-                        </select>
-                        <select id="filter-status" onchange="renderTable()" class="w-full">
-                            <option value="ALL">Semua Status</option>
-                            <option value="Berfungsi">Berfungsi</option>
-                            <option value="Rosak">Rosak</option>
-                            <option value="Lupus">Lupus</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Table Area -->
-            <div class="bg-white rounded-xl shadow-sm border-2 border-slate-200 flex flex-col overflow-hidden w-full">
-                <div class="overflow-x-auto w-full">
-                    <table class="w-full text-left border-collapse min-w-[900px]">
-                        <thead>
-                            <tr>
-                                <th class="py-2 px-3 w-10 text-center border-b-2 border-slate-300">No</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Nama Peralatan</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Jenis / Jenama / Model</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Nombor Siri</th>
-                                <th class="py-2 px-3 text-center border-b-2 border-slate-300">Tahun (Usia)</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Lokasi</th>
-                                <th class="py-2 px-3 text-center border-b-2 border-slate-300">Kuantiti</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Status</th>
-                                <th class="py-2 px-3 text-center w-20 admin-only-col hidden border-b-2 border-slate-300">Tindakan</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-slate-100">
-                            <!-- Rows populated dynamically -->
-                            <tr><td colspan="9" class="text-center py-6 text-slate-400 font-medium text-xs">Memuatkan data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-
-        <!-- VIEW: REGISTRATION -->
-        <main id="view-registration" class="hidden flex-col bg-slate-50 relative w-full">
-            
-            <!-- Overlay for Non-Admins -->
-            <div id="admin-overlay" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-white hidden">
-                <i class="fa-solid fa-lock text-5xl mb-4 text-slate-300"></i>
-                <h2 class="text-2xl font-bold mb-2">Akses Disekat</h2>
-                <p class="text-slate-300 mb-6">Sila log masuk sebagai Admin untuk mendaftar harta modal baru.</p>
-                <button onclick="toggleAdminLogin()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-md font-semibold shadow-lg transition-all">
-                    Log Masuk Sekarang
-                </button>
-            </div>
-
-            <div class="p-4 md:p-6 lg:p-8 w-full">
-                <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
-                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-6 border-b pb-4">Borang Pendaftaran Harta Modal</h2>
-                    
-                    <form id="form-registration" onsubmit="handleFormSubmit(event)">
-                        <input type="hidden" id="form-id" value="">
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            
-                            <!-- Maklumat Utama (Wajib) -->
-                            <div class="col-span-1 md:col-span-2 lg:col-span-3">
-                                <h3 class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-3">Maklumat Asas (Wajib)</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="col-span-1 md:col-span-2">
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Peralatan *</label>
-                                        <input type="text" id="inp-nama" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Jenis Harta *</label>
-                                        <select id="inp-jenis" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="">Pilih Jenis...</option>
-                                            <option value="ICT / Komputer">ICT / Komputer</option>
-                                            <option value="Perabot">Perabot</option>
-                                            <option value="Kenderaan">Kenderaan</option>
-                                            <option value="Mesin & Jentera">Mesin & Jentera</option>
-                                            <option value="Lain-lain">Lain-lain</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Model *</label>
-                                        <input type="text" id="inp-model" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Kuantiti *</label>
-                                        <input type="number" id="inp-kuantiti" min="1" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Tahun Perolehan *</label>
-                                        <input type="number" id="inp-tahun" min="1900" max="2100" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div class="col-span-1 md:col-span-3">
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Lokasi Ditempatkan *</label>
-                                        <input type="text" id="inp-lokasi" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cth: Makmal Komputer A, Pejabat Am...">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Maklumat Tambahan -->
-                            <div class="col-span-1 md:col-span-2 lg:col-span-3 border-t pt-4 mt-2">
-                                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Maklumat Tambahan</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Jenama</label>
-                                        <input type="text" id="inp-jenama" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Tarikh Perolehan</label>
-                                        <input type="date" id="inp-tarikh" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Nombor Siri</label>
-                                        <input type="text" id="inp-siri" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Nombor Pendaftaran</label>
-                                        <input type="text" id="inp-pendaftaran" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div class="col-span-1 md:col-span-2">
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Syarikat Pembekal</label>
-                                        <input type="text" id="inp-pembekal" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Harga Perolehan (RM)</label>
-                                        <input type="number" step="0.01" id="inp-harga" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Penerima</label>
-                                        <input type="text" id="inp-penerima" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Pengesah</label>
-                                        <input type="text" id="inp-pengesah" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status & Catatan -->
-                            <div class="col-span-1 md:col-span-2 lg:col-span-3 border-t pt-4 mt-2">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Status Keadaan *</label>
-                                        <select id="inp-status" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="Berfungsi" class="text-emerald-600">Berfungsi</option>
-                                            <option value="Rosak" class="text-rose-600">Rosak</option>
-                                            <option value="Lupus" class="text-slate-600">Lupus</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Jenis Penerimaan *</label>
-                                        <select id="inp-jenispenerimaan" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="Belian Terus">Belian Terus</option>
-                                            <option value="Sumbangan">Sumbangan</option>
-                                            <option value="Lease-to-use">Lease-to-use</option>
-                                            <option value="Lease-to-own">Lease-to-own</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-span-1 md:col-span-3">
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Catatan</label>
-                                        <textarea id="inp-catatan" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 flex justify-end gap-3">
-                            <button type="button" onclick="clearForm()" class="px-5 py-2 border border-slate-300 rounded-md text-slate-600 hover:bg-slate-50 font-medium transition-colors">Semula</button>
-                            <button type="submit" id="btn-submit-form" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium shadow-sm transition-colors flex items-center gap-2">
-                                <i class="fa-solid fa-save"></i> Simpan Harta Modal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </main>
-
-        <!-- VIEW: PINJAMAN -->
-        <main id="view-pinjaman" class="hidden flex-col bg-slate-50 w-full p-4 md:p-6 lg:p-8">
-            <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col w-full overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">Rekod Pinjaman Harta Modal</h2>
-                        <p class="text-sm text-slate-500">Senarai pinjaman dan pergerakan harta modal oleh warga sekolah.</p>
-                    </div>
-                    <button onclick="openLoanModal()" class="admin-only-col hidden px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium shadow-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Rekod Pinjaman
-                    </button>
-                </div>
-
-                <div class="overflow-x-auto w-full p-0">
-                    <table class="w-full text-left border-collapse min-w-[900px]">
-                        <thead>
-                            <tr>
-                                <th class="py-2 px-3 w-10 text-center border-b-2 border-slate-300">No</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Nama Peminjam</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">Jenama & Model</th>
-                                <th class="py-2 px-3 border-b-2 border-slate-300">No Daftar / Siri</th>
-                                <th class="py-2 px-3 text-center border-b-2 border-slate-300">Tarikh Pinjam</th>
-                                <th class="py-2 px-3 text-center border-b-2 border-slate-300">Tarikh Pulang / Tempoh</th>
-                                <th class="py-2 px-3 text-center border-b-2 border-slate-300">Status</th>
-                                <th class="py-2 px-3 text-center w-20 admin-only-col hidden border-b-2 border-slate-300">Tindakan</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loan-table-body" class="divide-y divide-slate-100">
-                            <!-- Populated dynamically -->
-                            <tr><td colspan="8" class="text-center py-6 text-slate-400 font-medium text-xs">Tiada rekod pinjaman.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Admin Login Modal -->
-    <div id="modal-admin" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
-            <div class="px-6 py-4 border-b bg-slate-50">
-                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i>Pengesahan Admin</h3>
-            </div>
-            <div class="p-6">
-                <p class="text-sm text-slate-600 mb-4">Masukkan kata laluan untuk kebenaran Tambah, Edit dan Padam.</p>
-                <input type="password" id="admin-password" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Kata Laluan...">
-                <div class="text-red-500 text-sm mb-4 hidden" id="admin-error">Kata laluan salah!</div>
-                <div class="flex justify-end gap-2">
-                    <button onclick="closeModal('modal-admin')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md font-medium">Batal</button>
-                    <button onclick="verifyAdmin()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">Sahkan</button>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Loan Modal Form -->
-    <div id="modal-loan" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="px-6 py-4 border-b bg-indigo-50 flex justify-between items-center shrink-0">
-                <h3 class="text-lg font-bold text-indigo-800"><i class="fa-solid fa-handshake mr-2"></i>Borang Pinjaman Harta</h3>
-                <button onclick="closeModal('modal-loan')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div class="container mx-auto p-4 flex flex-col gap-6">
+        <div class="flex gap-2 border-b border-slate-300 pb-2 no-print overflow-x-auto">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-t-md whitespace-nowrap">DASHBOARD</button>
+            <button onclick="switchTab('registration')" id="tab-registration" class="px-4 py-2 bg-slate-200 text-slate-600 font-bold text-xs rounded-t-md hover:bg-slate-300 transition-colors admin-only hidden whitespace-nowrap">PENDAFTARAN HARTA</button>
+            <button onclick="switchTab('loan')" id="tab-loan" class="px-4 py-2 bg-slate-200 text-slate-600 font-bold text-xs rounded-t-md hover:bg-slate-300 transition-colors whitespace-nowrap">REKOD PINJAMAN</button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard" class="space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+                    <p class="text-xs text-slate-500 font-bold">JUMLAH HARTA</p>
+                    <h2 class="text-2xl font-black text-slate-800" id="total-assets">0</h2>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-emerald-500">
+                    <p class="text-xs text-slate-500 font-bold">BERFUNGSI</p>
+                    <h2 class="text-2xl font-black text-slate-800" id="total-functioning">0</h2>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-rose-500">
+                    <p class="text-xs text-slate-500 font-bold">ROSAK</p>
+                    <h2 class="text-2xl font-black text-slate-800" id="total-broken">0</h2>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-slate-500">
+                    <p class="text-xs text-slate-500 font-bold">LUPUS</p>
+                    <h2 class="text-2xl font-black text-slate-800" id="total-disposed">0</h2>
+                </div>
             </div>
-            <div class="p-6 overflow-y-auto">
-                <form id="form-loan" onsubmit="handleLoanSubmit(event)">
-                    <input type="hidden" id="loan-form-id" value="">
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Pilih Harta Modal *</label>
-                            <select id="loan-asset-id" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <!-- Populated dynamically -->
-                            </select>
-                            <p class="text-xs text-slate-500 mt-1">Hanya memaparkan harta modal yang telah didaftarkan.</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Peminjam *</label>
-                            <input type="text" id="loan-nama" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Cth: Cikgu Ahmad">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Tarikh Pinjam *</label>
-                                <input type="date" id="loan-tarikh-pinjam" required class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Tarikh Pemulangan</label>
-                                <input type="date" id="loan-tarikh-pulang" onchange="updateLoanStatus()" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Status Pinjaman (Automatik)</label>
-                            <select id="loan-status" disabled class="w-full px-3 py-2 border border-slate-300 rounded-md bg-slate-100 text-amber-600 appearance-none">
-                                <option value="Sedang Dipinjam">Sedang Dipinjam</option>
-                                <option value="Telah Dipulangkan">Telah Dipulangkan</option>
-                            </select>
-                        </div>
+
+            <!-- Chart Centered -->
+            <div class="bg-white p-4 rounded-lg shadow no-print flex justify-center w-full">
+                <div class="w-full max-w-md">
+                    <h3 class="font-bold text-slate-700 mb-4 border-b pb-2 text-center text-sm">STATUS HARTA MODAL</h3>
+                    <canvas id="statusChart" class="w-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Table & Filters below Chart -->
+            <div class="bg-white p-4 rounded-lg shadow print-container w-full overflow-hidden">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="font-bold text-slate-700 text-sm">SENARAI HARTA MODAL</h3>
+                    <button onclick="window.print()" class="bg-slate-800 text-white px-3 py-1 rounded text-xs font-bold hover:bg-slate-700 transition-colors no-print">
+                        <i class="fa-solid fa-print mr-1"></i> CETAK
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-4 no-print bg-slate-50 p-3 rounded border border-slate-200">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">NAMA PERALATAN</label>
+                        <input type="text" id="filter-nama" oninput="renderAssetsTable()" placeholder="CARI NAMA..." class="w-full text-xs p-1 border rounded uppercase">
                     </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">JENAMA</label>
+                        <input type="text" id="filter-jenama" oninput="renderAssetsTable()" placeholder="CARI JENAMA..." class="w-full text-xs p-1 border rounded uppercase">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">MODEL</label>
+                        <input type="text" id="filter-model" oninput="renderAssetsTable()" placeholder="CARI MODEL..." class="w-full text-xs p-1 border rounded uppercase">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">PENERIMAAN</label>
+                        <select id="filter-jenis" onchange="renderAssetsTable()" class="w-full text-xs p-1 border rounded uppercase">
+                            <option value="">SEMUA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">TAHUN</label>
+                        <select id="filter-tahun" onchange="renderAssetsTable()" class="w-full text-xs p-1 border rounded uppercase">
+                            <option value="">SEMUA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">LOKASI</label>
+                        <select id="filter-lokasi" onchange="renderAssetsTable()" class="w-full text-xs p-1 border rounded uppercase">
+                            <option value="">SEMUA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">STATUS</label>
+                        <select id="filter-status" onchange="renderAssetsTable()" class="w-full text-xs p-1 border rounded uppercase">
+                            <option value="">SEMUA</option>
+                            <option value="BERFUNGSI">BERFUNGSI</option>
+                            <option value="ROSAK">ROSAK</option>
+                            <option value="LUPUS">LUPUS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr class="bg-slate-100 border-b-2 border-slate-300 text-xs text-slate-800">
+                                <th class="p-2 font-bold w-10">BIL</th>
+                                <th class="p-2 font-bold">NAMA PERALATAN</th>
+                                <th class="p-2 font-bold">NO. DAFTAR</th>
+                                <th class="p-2 font-bold">JENAMA & MODEL</th>
+                                <th class="p-2 font-bold">NO. SIRI</th>
+                                <th class="p-2 font-bold">KNT</th>
+                                <th class="p-2 font-bold">USIA</th>
+                                <th class="p-2 font-bold">LOKASI</th>
+                                <th class="p-2 font-bold">STATUS</th>
+                                <th class="p-2 font-bold text-center admin-only hidden no-print">TINDAKAN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assets-table-body" class="font-normal">
+                            <!-- Table rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTRATION TAB -->
+        <div id="registration" class="hidden">
+            <div class="bg-white p-6 rounded-lg shadow max-w-4xl mx-auto">
+                <h3 class="font-bold text-slate-700 mb-4 border-b pb-2 text-sm" id="form-title">PENDAFTARAN HARTA MODAL BAHARU</h3>
+                <form id="asset-form" onsubmit="saveAsset(event)" class="space-y-4">
+                    <input type="hidden" id="asset-id">
                     
-                    <div class="mt-8 flex justify-end gap-2">
-                        <button type="button" onclick="closeModal('modal-loan')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md font-medium">Batal</button>
-                        <button type="submit" id="btn-submit-loan" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium flex items-center gap-2">
-                            <i class="fa-solid fa-save"></i> Simpan
-                        </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">NAMA PERALATAN *</label><input type="text" id="nama_peralatan" required class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">JENAMA</label><input type="text" id="jenama" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">MODEL *</label><input type="text" id="model" required class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">KUANTITI *</label><input type="number" id="kuantiti" required min="1" value="1" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">TAHUN PEROLEHAN *</label><input type="number" id="tahun_perolehan" required min="1990" max="2050" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">TARIKH DITERIMA</label><input type="date" id="tarikh" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">NOMBOR SIRI</label><input type="text" id="nombor_siri" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">NOMBOR PENDAFTARAN</label><input type="text" id="nombor_pendaftaran" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">SYARIKAT PEMBEKAL</label><input type="text" id="syarikat_pembekal" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">HARGA PEROLEHAN (RM)</label><input type="number" id="harga_perolehan" step="0.01" min="0" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">NAMA PENERIMA</label><input type="text" id="penerima" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">NAMA PEGAWAI PENGESAH</label><input type="text" id="pengesah" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">STATUS *</label>
+                            <select id="status" required class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal">
+                                <option value="BERFUNGSI">BERFUNGSI</option>
+                                <option value="ROSAK">ROSAK</option>
+                                <option value="LUPUS">LUPUS</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">JENIS PENERIMAAN</label>
+                            <select id="jenis_penerimaan" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal">
+                                <option value="">- PILIH -</option>
+                                <option value="PEMBELIAN">PEMBELIAN</option>
+                                <option value="PEROLEHAN KERAJAAN">PEROLEHAN KERAJAAN</option>
+                                <option value="HADIAH">HADIAH</option>
+                                <option value="SUMBANGAN">SUMBANGAN</option>
+                                <option value="SEWA BELI">SEWA BELI</option>
+                                <option value="PAJAKAN">PAJAKAN</option>
+                                <option value="LEASE-TO-USE">LEASE-TO-USE</option>
+                                <option value="LEASE-TO-OWN">LEASE-TO-OWN</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-xs font-bold text-slate-600 mb-1">LOKASI PENEMPATAN *</label><input type="text" id="lokasi" required class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">CATATAN</label><textarea id="catatan" rows="3" class="w-full text-xs p-2 border border-slate-300 rounded focus:border-blue-500 outline-none uppercase font-normal"></textarea></div>
+                    
+                    <div class="flex justify-end gap-2 pt-4 border-t">
+                        <button type="button" onclick="resetForm()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded hover:bg-slate-300">RESET</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded hover:bg-blue-700">SIMPAN REKOD</button>
                     </div>
                 </form>
             </div>
         </div>
-    </div>
 
-    <!-- Print Modal -->
-    <div id="modal-print" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div class="px-6 py-4 border-b bg-slate-50">
-                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-print text-slate-600 mr-2"></i>Cetak Laporan</h3>
+        <!-- LOAN TAB -->
+        <div id="loan" class="hidden space-y-6">
+            <div id="view-loan-form" class="bg-white p-6 rounded-lg shadow max-w-4xl mx-auto admin-only hidden">
+                <h3 class="font-bold text-slate-700 mb-4 border-b pb-2 text-sm" id="loan-form-title">REKOD PINJAMAN BAHARU</h3>
+                <form id="loan-form" onsubmit="saveLoan(event)" class="space-y-4">
+                    <input type="hidden" id="loan-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">NAMA PEMINJAM *</label>
+                            <input type="text" id="nama_peminjam" required class="w-full text-xs p-2 border border-slate-300 rounded uppercase font-normal">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">PILIH HARTA MODAL *</label>
+                            <select id="loan_asset_id" required class="w-full text-xs p-2 border border-slate-300 rounded uppercase font-normal">
+                                <option value="">- PILIH HARTA -</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">TARIKH PINJAMAN *</label>
+                            <input type="date" id="tarikh_pinjaman" required class="w-full text-xs p-2 border border-slate-300 rounded uppercase font-normal">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">TARIKH PEMULANGAN (JIKA ADA)</label>
+                            <input type="date" id="tarikh_pemulangan" class="w-full text-xs p-2 border border-slate-300 rounded uppercase font-normal">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-4 border-t">
+                        <button type="button" onclick="resetLoanForm()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded">RESET</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded">SIMPAN PINJAMAN</button>
+                    </div>
+                </form>
             </div>
-            <div class="p-6">
-                <p class="text-sm text-slate-600 mb-4">Pilih lokasi untuk dicetak.</p>
-                <select id="print-lokasi" class="w-full px-4 py-2 border border-slate-300 rounded-md mb-6">
-                    <option value="ALL">Semua Lokasi</option>
-                    <!-- Populated dynamically -->
-                </select>
-                <div class="flex justify-end gap-2">
-                    <button onclick="closeModal('modal-print')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md font-medium">Batal</button>
-                    <button onclick="executePrint()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-md font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> Cetak
-                    </button>
+
+            <div class="bg-white p-4 rounded-lg shadow w-full overflow-hidden">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="font-bold text-slate-700 text-sm">SENARAI PINJAMAN</h3>
+                </div>
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                            <tr class="bg-slate-100 border-b-2 border-slate-300 text-xs text-slate-800">
+                                <th class="p-2 font-bold w-10">BIL</th>
+                                <th class="p-2 font-bold">NAMA PEMINJAM</th>
+                                <th class="p-2 font-bold">NAMA PERALATAN</th>
+                                <th class="p-2 font-bold">JENAMA & MODEL</th>
+                                <th class="p-2 font-bold">NO. PENDAFTARAN</th>
+                                <th class="p-2 font-bold">TARIKH PINJAM</th>
+                                <th class="p-2 font-bold">TEMPOH</th>
+                                <th class="p-2 font-bold">STATUS</th>
+                                <th class="p-2 font-bold text-center admin-only hidden">TINDAKAN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loans-table-body" class="font-normal">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Message Modal (Replacement for Alert) -->
-    <div id="modal-msg" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
-            <div id="msg-icon" class="text-4xl mb-4 text-blue-500"><i class="fa-solid fa-circle-info"></i></div>
-            <h3 id="msg-title" class="text-lg font-bold text-slate-800 mb-2">Makluman</h3>
-            <p id="msg-body" class="text-sm text-slate-600 mb-6">Mesej di sini</p>
-            <button onclick="closeModal('modal-msg')" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium w-full">Tutup</button>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex flex-col items-center justify-center text-white hidden">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-blue-400"></i>
+        <p class="font-bold tracking-widest text-xs" id="loading-text">MEMUATKAN DATA...</p>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-[100] flex flex-col items-center justify-center hidden no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-sm border border-slate-200 text-left">
+            <h3 id="modal-title" class="font-bold text-slate-800 text-lg mb-2 uppercase"></h3>
+            <p id="modal-message" class="text-slate-600 text-sm mb-4 font-normal uppercase"></p>
+            <input type="password" id="modal-input" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-md mb-4 hidden focus:outline-none focus:border-blue-500 font-normal uppercase">
+            <div class="flex justify-end gap-2 mt-2">
+                <button id="modal-cancel" class="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-300 font-bold rounded-md hover:bg-slate-200 transition-colors text-xs hidden uppercase">BATAL</button>
+                <button id="modal-confirm" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors text-xs uppercase">OK</button>
+            </div>
         </div>
     </div>
 
-    <!-- Print View Container (Hidden in normal view) -->
-    <div id="print-view" class="print-only w-full">
-        <div class="print-header">
-            DAFTAR HARTA MODAL<br>
-            <span id="print-subtitle" style="font-size: 14px; font-weight: normal;"></span>
-        </div>
-        <table class="print-table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Peralatan</th>
-                    <th>Jenama / Model</th>
-                    <th>No. Siri / No. Pendaftaran</th>
-                    <th>Lokasi</th>
-                    <th>Kuantiti</th>
-                    <th>Tahun (Usia)</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="print-table-body"></tbody>
-        </table>
-    </div>
-
-    <!-- Google Sheets Setup & Logic -->
     <script>
+        // PENTING: Masukkan URL Web App Google Script anda yang sebenar di bawah
+        let GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzde-V-hepc2Ld1ppjz0xrhl3buIZ8g5Utno0ka41JwKHve05Doo_t5pdBYTTFvXuYJGA/exec'; 
         
-        // PENTING: TAMPAL WEB APP URL DARI APPS SCRIPT ANDA DI SINI
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzde-V-hepc2Ld1ppjz0xrhl3buIZ8g5Utno0ka41JwKHve05Doo_t5pdBYTTFvXuYJGA/exec';
-        
-        // App State
-        let assets = [];
-        let loans = []; // Menyimpan Rekod Pinjaman
+        let assetsData = [];
+        let loansData = [];
         let isAdmin = false;
-        let isDemoMode = false; // Penanda Mod Offline/Demo
-        const adminPass = 'SkaiTba0078#HARTA';
-        let charts = { jenis: null, status: null };
-        let currentYear = new Date().getFullYear();
+        let useDemoData = false;
+        let statusChartInstance = null;
 
-        // Load Data dari Apps Script sewaktu page dibuka
-        async function loadData() {
-            try {
-                const tbody = document.getElementById('table-body');
-                if(tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>MEMUATKAN DATA DARI GOOGLE SHEETS...</td></tr>`;
-                
-                if(GOOGLE_SCRIPT_URL === 'SILA_LETAK_URL_WEB_APP_DI_SINI' || GOOGLE_SCRIPT_URL === '') {
-                    throw new Error("URL WEB APP TIDAK DIJUMPAI");
+        function showLoading(text) {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            if (text) document.getElementById('loading-text').innerText = text;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        window.showModal = (title, message, type = 'alert', callback = null) => {
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const messageEl = document.getElementById('modal-message');
+            const inputEl = document.getElementById('modal-input');
+            const cancelBtn = document.getElementById('modal-cancel');
+            const confirmBtn = document.getElementById('modal-confirm');
+
+            titleEl.innerText = title;
+            messageEl.innerHTML = message;
+            inputEl.value = '';
+
+            inputEl.classList.add('hidden');
+            cancelBtn.classList.add('hidden');
+
+            if (type === 'prompt') {
+                inputEl.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+                setTimeout(() => inputEl.focus(), 100);
+            } else if (type === 'confirm') {
+                cancelBtn.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+            newConfirmBtn.onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) {
+                    if (type === 'prompt') callback(inputEl.value);
+                    else callback(true);
                 }
+            };
 
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    redirect: "follow",
-                    method: "GET"
+            newCancelBtn.onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) {
+                    if (type === 'prompt') callback(null);
+                    else callback(false);
+                }
+            };
+        };
+
+        function fetchData() {
+            showLoading("MEMUATKAN DATA...");
+            fetch(GOOGLE_SCRIPT_URL, {
+                redirect: "follow",
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                assetsData = data.assets || [];
+                loansData = data.loans || [];
+                processData();
+                hideLoading();
+            })
+            .catch(error => {
+                useDemoData = true;
+                
+                // Fallback Demo Data
+                assetsData = [
+                    { id: '1', nama_peralatan: "KOMPUTER RIBA", jenis_harta: "ACER", jenama: "ACER", model: "ASPIRE 5", kuantiti: 1, tahun_perolehan: 2022, tarikh: "2022-05-10", nombor_siri: "SN12345", nombor_pendaftaran: "KK/KPT/01", syarikat_pembekal: "TECH SDN BHD", harga_perolehan: 2500, penerima: "AHMAD", pengesah: "ALI", status: "BERFUNGSI", jenis_penerimaan: "PEMBELIAN", lokasi: "MAKMAL KOMPUTER", catatan: "KEADAAN BAIK" },
+                    { id: '2', nama_peralatan: "PROJEKTOR", jenis_harta: "EPSON", jenama: "EPSON", model: "EB-X41", kuantiti: 1, tahun_perolehan: 2020, tarikh: "2020-02-15", nombor_siri: "SN98765", nombor_pendaftaran: "KK/PRJ/02", syarikat_pembekal: "VISUAL SDN BHD", harga_perolehan: 1800, penerima: "SITI", pengesah: "ALI", status: "ROSAK", jenis_penerimaan: "SUMBANGAN", lokasi: "BILIK MESYUARAT", catatan: "LAMPU TERBAKAR" }
+                ];
+                
+                loansData = [
+                    { loan_id: 'L1', asset_id: "1", nama_peminjam: "CIKGU AMIN", tarikh_pinjaman: "2023-10-01", tarikh_pemulangan: "", status_pinjaman: "SEDANG DIPINJAM", timestamp: "2023-10-01T08:00:00Z" }
+                ];
+                
+                processData();
+                hideLoading();
+                
+                const warningBanner = document.createElement('div');
+                warningBanner.className = 'bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4 text-xs font-bold uppercase mx-4 mt-4';
+                warningBanner.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> MOD DEMO AKTIF: GAGAL MENYAMBUNG KE GOOGLE SHEETS.';
+                document.getElementById('dashboard').prepend(warningBanner);
+            });
+        }
+
+        function processData() {
+            populateDropdowns();
+            renderAssetsTable();
+            renderLoansTable();
+            updateChart();
+        }
+
+        function switchTab(tabId) {
+            ['dashboard', 'registration', 'loan'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById('tab-' + id).classList.replace('bg-blue-600', 'bg-slate-200');
+                document.getElementById('tab-' + id).classList.replace('text-white', 'text-slate-600');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.replace('bg-slate-200', 'bg-blue-600');
+            document.getElementById('tab-' + tabId).classList.replace('text-slate-600', 'text-white');
+        }
+
+        // Dropdown Populasi (Filters & Loan Select)
+        function populateDropdowns() {
+            const types = new Set();
+            const years = new Set();
+            const locations = new Set();
+            
+            assetsData.forEach(a => {
+                if(a.jenis_penerimaan) types.add(String(a.jenis_penerimaan).toUpperCase());
+                if(a.tahun_perolehan) years.add(a.tahun_perolehan);
+                if(a.lokasi) locations.add(String(a.lokasi).toUpperCase());
+            });
+
+            const selJenis = document.getElementById('filter-jenis');
+            if(selJenis) {
+                selJenis.innerHTML = '<option value="">SEMUA</option>';
+                [...types].sort().forEach(t => selJenis.innerHTML += `<option value="${escapeHTML(t)}">${escapeHTML(t)}</option>`);
+            }
+            
+            const selTahun = document.getElementById('filter-tahun');
+            if(selTahun) {
+                selTahun.innerHTML = '<option value="">SEMUA</option>';
+                [...years].sort((a,b)=>b-a).forEach(y => selTahun.innerHTML += `<option value="${escapeHTML(y)}">${escapeHTML(y)}</option>`);
+            }
+            
+            const selLokasi = document.getElementById('filter-lokasi');
+            if(selLokasi) {
+                selLokasi.innerHTML = '<option value="">SEMUA</option>';
+                [...locations].sort().forEach(l => selLokasi.innerHTML += `<option value="${escapeHTML(l)}">${escapeHTML(l)}</option>`);
+            }
+
+            const loanAssetSelect = document.getElementById('loan_asset_id');
+            if(loanAssetSelect) {
+                loanAssetSelect.innerHTML = '<option value="">- PILIH HARTA MODAL -</option>';
+                assetsData.forEach(a => {
+                    let lbl = `${a.nama_peralatan || ''} | ${a.jenama || ''} ${a.model || ''} | SN: ${a.nombor_siri || 'TIADA'}`;
+                    loanAssetSelect.innerHTML += `<option value="${a.id}">${escapeHTML(lbl.toUpperCase())}</option>`;
                 });
-                
-                if (!res.ok) {
-                    throw new Error("HTTP STATUS " + res.status + " - MUNGKIN ISU PERMISSIONS (ANYONE)");
-                }
-
-                const data = await res.json();
-                
-                // Tampung struktur lama & struktur baru daripada App Script (Assets & Loans)
-                let rawAssets = Array.isArray(data) ? data : (data.assets || []);
-                let rawLoans = Array.isArray(data) ? [] : (data.loans || []);
-                
-                assets = rawAssets.map(item => ({
-                    ...item,
-                    id: String(item.id),
-                    kuantiti: parseInt(item.kuantiti) || 0,
-                    tahun_perolehan: parseInt(item.tahun_perolehan) || currentYear,
-                    harga_perolehan: parseFloat(item.harga_perolehan) || 0,
-                    timestamp: parseInt(item.timestamp) || 0
-                }));
-
-                loans = rawLoans.map(item => ({
-                    ...item,
-                    loan_id: String(item.loan_id),
-                    asset_id: String(item.asset_id),
-                    timestamp: parseInt(item.timestamp) || 0
-                }));
-                
-                // Susun ikut data terkini didaftarkan
-                assets.sort((a, b) => b.timestamp - a.timestamp);
-                loans.sort((a, b) => b.timestamp - a.timestamp);
-                isDemoMode = false;
-                renderApp();
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                const errMsg = "GAGAL BERHUBUNG DENGAN GOOGLE SHEETS. PUNCA: " + err.message + ". PASTIKAN APPS SCRIPT DI-DEPLOY KEPADA 'ANYONE'. SISTEM KINI BERTUKAR KE MOD DEMO (DATA LOKAL).";
-                showMsg("MOD DEMO AKTIF", errMsg, "error");
-                
-                // Masukkan data contoh (Fallback) supaya sistem tidak tersekat
-                isDemoMode = true;
-                assets = [
-                    { id: "101", nama_peralatan: "Komputer Riba", jenis_harta: "ICT / Komputer", model: "Dell Latitude 5420", kuantiti: 5, tahun_perolehan: 2022, lokasi: "Makmal Komputer A", status: "Berfungsi", harga_perolehan: 3500, timestamp: Date.now(), nombor_pendaftaran: "HARTA/2022/A1" },
-                    { id: "102", nama_peralatan: "Kerusi Pejabat Ergonomik", jenis_harta: "Perabot", model: "IKEA Markus", kuantiti: 12, tahun_perolehan: 2020, lokasi: "Pejabat Pentadbiran", status: "Berfungsi", harga_perolehan: 450, timestamp: Date.now() - 1000, nombor_pendaftaran: "HARTA/2020/B4" },
-                    { id: "103", nama_peralatan: "Pencetak Laserjet", jenis_harta: "ICT / Komputer", model: "HP Laserjet Pro", kuantiti: 2, tahun_perolehan: 2018, lokasi: "Bilik Guru", status: "Rosak", harga_perolehan: 800, timestamp: Date.now() - 2000, nombor_pendaftaran: "HARTA/2018/C1" }
-                ];
-                loans = [
-                    { loan_id: "L01", asset_id: "101", nama_peminjam: "Cikgu Ahmad (Sains)", tarikh_pinjaman: "2024-05-15", tarikh_pemulangan: "2024-05-20", status_pinjaman: "Sedang Dipinjam", timestamp: Date.now() }
-                ];
-                renderApp();
             }
         }
 
-        // Mulakan load data
-        loadData();
-
-        window.switchTab = (tab) => {
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-registration').classList.add('hidden');
-            document.getElementById('view-pinjaman').classList.add('hidden');
-            
-            document.getElementById('tab-dashboard').className = "px-3 py-2 rounded-md text-slate-400 hover:text-white font-bold text-[11px] transition-all tracking-wide";
-            document.getElementById('tab-registration').className = "px-3 py-2 rounded-md text-slate-400 hover:text-white font-bold text-[11px] transition-all tracking-wide";
-            document.getElementById('tab-pinjaman').className = "px-3 py-2 rounded-md text-slate-400 hover:text-white font-bold text-[11px] transition-all tracking-wide";
-            
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).className = "px-3 py-2 rounded-md bg-blue-600 text-white font-extrabold text-[11px] transition-all shadow-md tracking-wide";
-
-            if (tab === 'dashboard') {
-                renderApp(); 
-            } else if (tab === 'registration') {
-                if (!isAdmin) {
-                    document.getElementById('admin-overlay').classList.remove('hidden');
-                } else {
-                    document.getElementById('admin-overlay').classList.add('hidden');
-                }
-            } else if (tab === 'pinjaman') {
-                renderLoans();
-            }
-        };
-
-        window.renderApp = () => {
-            updateMetrics();
-            populateFilters();
-            renderTable();
-            renderCharts();
-        };
-
-        function updateMetrics() {
-            let total = 0, working = 0, broken = 0, lupus = 0, value = 0;
-            assets.forEach(a => {
-                let q = parseInt(a.kuantiti) || 1;
-                total += q;
-                if (a.status === 'Berfungsi') working += q;
-                if (a.status === 'Rosak') broken += q;
-                if (a.status === 'Lupus') lupus += q;
-                value += (parseFloat(a.harga_perolehan) || 0) * q;
-            });
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-working').innerText = working;
-            document.getElementById('stat-broken').innerText = broken;
-            document.getElementById('stat-lupus').innerText = lupus;
-            document.getElementById('stat-value').innerText = `RM ${value.toLocaleString('ms-MY', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        }
-
-        function populateFilters() {
-            const lokasiSet = new Set();
-            const jenisSet = new Set();
-            assets.forEach(a => {
-                if(a.lokasi) lokasiSet.add(a.lokasi);
-                if(a.jenis_harta) jenisSet.add(a.jenis_harta);
-            });
-
-            const currentLoc = document.getElementById('filter-lokasi').value;
-            const currentJenis = document.getElementById('filter-jenis').value;
-
-            const locSelect = document.getElementById('filter-lokasi');
-            const jenisSelect = document.getElementById('filter-jenis');
-            const printLoc = document.getElementById('print-lokasi');
-
-            let locHTML = '<option value="ALL">SEMUA LOKASI</option>';
-            Array.from(lokasiSet).sort().forEach(l => { locHTML += `<option value="${l}">${String(l).toUpperCase()}</option>`; });
-            
-            locSelect.innerHTML = locHTML;
-            printLoc.innerHTML = locHTML;
-            locSelect.value = currentLoc || 'ALL';
-
-            let jenisHTML = '<option value="ALL">SEMUA JENIS HARTA</option>';
-            Array.from(jenisSet).sort().forEach(j => { jenisHTML += `<option value="${j}">${String(j).toUpperCase()}</option>`; });
-            jenisSelect.innerHTML = jenisHTML;
-            jenisSelect.value = currentJenis || 'ALL';
-        }
-
-        window.renderTable = () => {
-            const tbody = document.getElementById('table-body');
-            const fLoc = document.getElementById('filter-lokasi').value;
-            const fJenis = document.getElementById('filter-jenis').value;
-            const fStatus = document.getElementById('filter-status').value;
-
-            let filtered = assets.filter(a => {
-                return (fLoc === 'ALL' || a.lokasi === fLoc) &&
-                       (fJenis === 'ALL' || a.jenis_harta === fJenis) &&
-                       (fStatus === 'ALL' || a.status === fStatus);
-            });
-
+        // HARTA MODAL MODULE
+        function renderAssetsTable() {
+            const tbody = document.getElementById('assets-table-body');
+            if(!tbody) return;
             tbody.innerHTML = '';
+            
+            let fNama = (document.getElementById('filter-nama')?.value || '').toLowerCase();
+            let fJenama = (document.getElementById('filter-jenama')?.value || '').toLowerCase();
+            let fModel = (document.getElementById('filter-model')?.value || '').toLowerCase();
+            let fJenis = document.getElementById('filter-jenis')?.value || '';
+            let fTahun = document.getElementById('filter-tahun')?.value || '';
+            let fLokasi = document.getElementById('filter-lokasi')?.value || '';
+            let fStatus = document.getElementById('filter-status')?.value || '';
 
-            const adminCols = document.querySelectorAll('.admin-only-col');
-            adminCols.forEach(col => isAdmin ? col.classList.remove('hidden') : col.classList.add('hidden'));
+            let filtered = assetsData.filter(a => {
+                let mNama = String(a.nama_peralatan || '').toLowerCase().includes(fNama);
+                let mJenama = String(a.jenama || '').toLowerCase().includes(fJenama);
+                let mModel = String(a.model || '').toLowerCase().includes(fModel);
+                let mJenis = fJenis === '' || String(a.jenis_penerimaan || '').toUpperCase() === fJenis;
+                let mTahun = fTahun === '' || String(a.tahun_perolehan || '') === fTahun;
+                let mLokasi = fLokasi === '' || String(a.lokasi || '').toUpperCase() === fLokasi;
+                let mStatus = fStatus === '' || String(a.status || '').toUpperCase() === fStatus;
+                return mNama && mJenama && mModel && mJenis && mTahun && mLokasi && mStatus;
+            });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${isAdmin ? 9 : 8}" class="text-center py-8 text-slate-500">Tiada rekod harta dijumpai.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500 font-bold uppercase text-xs">Tiada rekod dijumpai.</td></tr>`;
+            } else {
+                let currentYear = new Date().getFullYear();
+                filtered.forEach((asset, index) => {
+                    let statusColor = 'bg-emerald-100 text-emerald-700 border-emerald-300';
+                    let st = String(asset.status || '').toUpperCase();
+                    if (st === 'ROSAK') statusColor = 'bg-rose-100 text-rose-700 border-rose-300';
+                    if (st === 'LUPUS') statusColor = 'bg-slate-200 text-slate-700 border-slate-400';
+
+                    let usia = asset.tahun_perolehan ? (currentYear - parseInt(asset.tahun_perolehan)) + ' TAHUN' : '-';
+
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-200 hover:bg-slate-50 text-[11px] text-slate-700">
+                            <td class="p-2 font-bold">${index + 1}</td>
+                            <td class="p-2">${escapeHTML(asset.nama_peralatan)}</td>
+                            <td class="p-2">${escapeHTML(asset.nombor_pendaftaran || '-')}</td>
+                            <td class="p-2">${escapeHTML(asset.jenama || '-')} <br> <span class="text-[10px] text-slate-500">${escapeHTML(asset.model || '')}</span></td>
+                            <td class="p-2">${escapeHTML(asset.nombor_siri || '-')}</td>
+                            <td class="p-2">${escapeHTML(asset.kuantiti)}</td>
+                            <td class="p-2">${usia}</td>
+                            <td class="p-2">${escapeHTML(asset.lokasi)}</td>
+                            <td class="p-2"><span class="px-2 py-1 rounded text-[10px] font-bold border ${statusColor}">${st}</span></td>
+                            <td class="p-2 text-center admin-only ${isAdmin ? '' : 'hidden'} no-print">
+                                <button onclick="editAsset('${asset.id}')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteAsset('${asset.id}')" class="text-rose-500 hover:text-rose-700 mx-1"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            updateChart();
+        }
+
+        window.saveAsset = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('asset-id').value;
+            let penerimaanVal = document.getElementById('jenis_penerimaan').value.toUpperCase();
+            
+            const assetData = {
+                nama_peralatan: document.getElementById('nama_peralatan').value.toUpperCase(),
+                jenama: document.getElementById('jenama').value.toUpperCase(),
+                model: document.getElementById('model').value.toUpperCase(),
+                kuantiti: document.getElementById('kuantiti').value,
+                tahun_perolehan: document.getElementById('tahun_perolehan').value,
+                tarikh: document.getElementById('tarikh').value,
+                nombor_siri: document.getElementById('nombor_siri').value.toUpperCase(),
+                nombor_pendaftaran: document.getElementById('nombor_pendaftaran').value.toUpperCase(),
+                syarikat_pembekal: document.getElementById('syarikat_pembekal').value.toUpperCase(),
+                harga_perolehan: document.getElementById('harga_perolehan').value,
+                penerima: document.getElementById('penerima').value.toUpperCase(),
+                pengesah: document.getElementById('pengesah').value.toUpperCase(),
+                status: document.getElementById('status').value.toUpperCase(),
+                jenis_penerimaan: penerimaanVal,
+                lokasi: document.getElementById('lokasi').value.toUpperCase(),
+                catatan: document.getElementById('catatan').value.toUpperCase(),
+                timestamp: new Date().toISOString()
+            };
+
+            showLoading(id ? "MENGEMASKINI REKOD..." : "MENYIMPAN REKOD...");
+
+            if (useDemoData) {
+                setTimeout(() => {
+                    if (id) {
+                        let index = assetsData.findIndex(a => String(a.id) === String(id));
+                        if(index > -1) assetsData[index] = { id, ...assetData };
+                    } else {
+                        assetsData.push({ id: new Date().getTime().toString(), ...assetData });
+                    }
+                    resetForm();
+                    processData();
+                    hideLoading();
+                    switchTab('dashboard');
+                    showModal('BERJAYA', 'Rekod (Demo) berjaya disimpan.', 'alert');
+                }, 500);
                 return;
             }
 
-            filtered.forEach((a, i) => {
-                const age = currentYear - parseInt(a.tahun_perolehan);
-                let statusColor = 'bg-slate-50 text-slate-700 border-slate-300';
-                if (a.status === 'Berfungsi') statusColor = 'bg-emerald-50 text-emerald-700 border-emerald-300';
-                else if (a.status === 'Rosak') statusColor = 'bg-rose-50 text-rose-700 border-rose-300';
-                else if (a.status === 'Lupus') statusColor = 'bg-slate-200 text-slate-800 border-slate-400';
-                
-                let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                
-                let actionsHTML = '';
-                if (isAdmin) {
-                    actionsHTML = `
-                        <td class="py-2 px-3 text-center admin-only-col border-l border-slate-100">
-                            <div class="flex items-center justify-center gap-3">
-                                <button onclick="editAsset('${a.id}')" class="text-blue-600 hover:text-blue-800" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="confirmDelete('${a.id}')" class="text-rose-600 hover:text-rose-800" title="Padam"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </td>
-                    `;
+            fetch(GOOGLE_SCRIPT_URL, {
+                redirect: 'follow',
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: id ? 'update' : 'create', id: id, data: assetData })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    if(id) {
+                        let idx = assetsData.findIndex(a => String(a.id) === String(id));
+                        if(idx > -1) assetsData[idx] = { id, ...assetData };
+                    } else {
+                        assetsData.push({ id: res.id, ...assetData });
+                    }
+                    resetForm();
+                    processData();
+                    switchTab('dashboard');
+                    showModal('BERJAYA', 'Data berjaya disimpan!', 'alert');
+                } else {
+                    showModal('RALAT', "Ralat: " + res.error, 'alert');
                 }
-
-                tr.innerHTML = `
-                    <td class="py-2 px-3 text-center text-slate-500">${i + 1}</td>
-                    <td class="py-2 px-3 text-black">${escapeHTML(a.nama_peralatan)}</td>
-                    <td class="py-2 px-3">
-                        <div class="text-[9px] text-slate-500">${escapeHTML(a.jenis_harta || '-')}</div>
-                        <div class="text-slate-800 uppercase">${escapeHTML(a.jenama || '-')} <span class="text-slate-400 mx-1">/</span> ${escapeHTML(a.model || '-')}</div>
-                    </td>
-                    <td class="py-2 px-3 text-slate-700">${escapeHTML(a.nombor_siri || '-')}</td>
-                    <td class="py-2 px-3 text-center">
-                        <span class="block text-black">${a.tahun_perolehan}</span>
-                        <span class="text-[9px] text-slate-400">(${age} THN)</span>
-                    </td>
-                    <td class="py-2 px-3 text-slate-700">${escapeHTML(a.lokasi)}</td>
-                    <td class="py-2 px-3 text-center text-black text-[13px]">${a.kuantiti}</td>
-                    <td class="py-2 px-3">
-                        <span class="px-2 py-1 rounded-[4px] text-[9px] uppercase border ${statusColor}">${a.status}</span>
-                    </td>
-                    ${actionsHTML}
-                `;
-                tbody.appendChild(tr);
+                hideLoading();
+            })
+            .catch(err => {
+                showModal('RALAT', "Gagal menghubungi pelayan.", 'alert');
+                hideLoading();
             });
         };
 
-        function renderCharts() {
-            let jenisData = {};
-            let statusData = { 'BERFUNGSI': 0, 'ROSAK': 0, 'LUPUS': 0 };
-
-            assets.forEach(a => {
-                let j = String(a.jenis_harta || 'LAIN-LAIN').toUpperCase();
-                jenisData[j] = (jenisData[j] || 0) + parseInt(a.kuantiti || 1);
-                
-                if(a.status === 'Berfungsi') statusData['BERFUNGSI'] += parseInt(a.kuantiti || 1);
-                if(a.status === 'Rosak') statusData['ROSAK'] += parseInt(a.kuantiti || 1);
-                if(a.status === 'Lupus') statusData['LUPUS'] += parseInt(a.kuantiti || 1);
+        window.editAsset = (id) => {
+            const asset = assetsData.find(a => String(a.id) === String(id));
+            if (!asset) return;
+            
+            document.getElementById('form-title').innerText = "KEMASKINI HARTA MODAL";
+            document.getElementById('asset-id').value = asset.id;
+            
+            const fields = ['nama_peralatan', 'jenama', 'model', 'kuantiti', 'tahun_perolehan', 'tarikh', 'nombor_siri', 'nombor_pendaftaran', 'syarikat_pembekal', 'harga_perolehan', 'penerima', 'pengesah', 'status', 'lokasi', 'catatan'];
+            fields.forEach(f => {
+                if(document.getElementById(f)) document.getElementById(f).value = asset[f] || '';
             });
+            
+            let pVal = String(asset.jenis_penerimaan || '').toUpperCase();
+            let jpEl = document.getElementById('jenis_penerimaan');
+            if(pVal && !Array.from(jpEl.options).some(opt => opt.value === pVal)) {
+                jpEl.innerHTML += `<option value="${pVal}">${pVal}</option>`;
+            }
+            jpEl.value = pVal;
 
-            if (charts.jenis) charts.jenis.destroy();
-            if (charts.status) charts.status.destroy();
+            switchTab('registration');
+        };
 
-            Chart.defaults.font.family = "Arial, Helvetica, sans-serif";
-            Chart.defaults.font.weight = "normal"; // Fon biasa untuk carta
-            Chart.defaults.color = "#475569"; 
-
-            const ctxJenis = document.getElementById('chartJenis').getContext('2d');
-            charts.jenis = new Chart(ctxJenis, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(jenisData),
-                    datasets: [{
-                        label: 'KUANTITI',
-                        data: Object.values(jenisData),
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        window.deleteAsset = (id) => {
+            showModal('PENGESAHAN', 'Adakah anda pasti memadam rekod ini?', 'confirm', (res) => {
+                if (res) {
+                    showLoading("MEMADAM REKOD...");
+                    if (useDemoData) {
+                        setTimeout(() => {
+                            assetsData = assetsData.filter(a => String(a.id) !== String(id));
+                            processData();
+                            hideLoading();
+                        }, 500);
+                        return;
+                    }
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        redirect: 'follow', method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'delete', id: id })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if(res.success) {
+                            assetsData = assetsData.filter(a => String(a.id) !== String(id));
+                            processData();
+                        } else showModal('RALAT', "Ralat: " + res.error, 'alert');
+                        hideLoading();
+                    })
+                    .catch(err => {
+                        showModal('RALAT', "Ralat pelayan.", 'alert');
+                        hideLoading();
+                    });
                 }
             });
+        };
 
-            const ctxStatus = document.getElementById('chartStatus').getContext('2d');
-            charts.status = new Chart(ctxStatus, {
+        window.resetForm = () => {
+            document.getElementById('form-title').innerText = "PENDAFTARAN HARTA MODAL BAHARU";
+            document.getElementById('asset-form').reset();
+            document.getElementById('asset-id').value = '';
+        };
+
+        // LOAN MODULE
+        function renderLoansTable() {
+            const tbody = document.getElementById('loans-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            if (loansData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-500 font-bold uppercase text-xs">Tiada rekod pinjaman.</td></tr>`;
+                return;
+            }
+
+            loansData.forEach((loan, index) => {
+                let asset = assetsData.find(a => String(a.id) === String(loan.asset_id));
+                let namaAset = asset ? asset.nama_peralatan : '<span class="text-rose-500 font-bold">ASET DIPADAM</span>';
+                let jnm = asset ? (asset.jenama || '-') + ' / ' + (asset.model || '-') : '-';
+                let noDaftar = asset ? (asset.nombor_pendaftaran || '-') : '-';
+                
+                let tarikhPinjam = new Date(loan.tarikh_pinjaman);
+                let tarikhPulang = loan.tarikh_pemulangan ? new Date(loan.tarikh_pemulangan) : new Date();
+                let diffTime = Math.abs(tarikhPulang - tarikhPinjam);
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                let tempohStr = diffDays + " HARI";
+
+                let statusColor = loan.status_pinjaman === 'SEDANG DIPINJAM' ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-emerald-100 text-emerald-700 border-emerald-300';
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50 text-[11px] text-slate-700">
+                        <td class="p-2 font-bold">${index + 1}</td>
+                        <td class="p-2 font-bold">${escapeHTML(loan.nama_peminjam)}</td>
+                        <td class="p-2">${namaAset}</td>
+                        <td class="p-2">${jnm}</td>
+                        <td class="p-2">${noDaftar}</td>
+                        <td class="p-2">${escapeHTML(loan.tarikh_pinjaman)}</td>
+                        <td class="p-2">${tempohStr}</td>
+                        <td class="p-2"><span class="px-2 py-1 rounded text-[10px] font-bold border ${statusColor}">${escapeHTML(loan.status_pinjaman)}</span></td>
+                        <td class="p-2 text-center admin-only ${isAdmin ? '' : 'hidden'}">
+                            <button onclick="editLoan('${loan.loan_id}')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteLoan('${loan.loan_id}')" class="text-rose-500 hover:text-rose-700 mx-1"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.saveLoan = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('loan-id').value;
+            let tPulang = document.getElementById('tarikh_pemulangan').value;
+            let stPinjam = tPulang ? "TELAH DIPULANGKAN" : "SEDANG DIPINJAM";
+
+            const lData = {
+                nama_peminjam: document.getElementById('nama_peminjam').value.toUpperCase(),
+                asset_id: document.getElementById('loan_asset_id').value,
+                tarikh_pinjaman: document.getElementById('tarikh_pinjaman').value,
+                tarikh_pemulangan: tPulang,
+                status_pinjaman: stPinjam,
+                timestamp: new Date().toISOString()
+            };
+
+            showLoading(id ? "MENGEMASKINI PINJAMAN..." : "MENYIMPAN PINJAMAN...");
+            
+            if (useDemoData) {
+                setTimeout(() => {
+                    if (id) {
+                        let idx = loansData.findIndex(l => String(l.loan_id) === String(id));
+                        if(idx > -1) loansData[idx] = { loan_id: id, ...lData };
+                    } else {
+                        loansData.push({ loan_id: 'L'+new Date().getTime(), ...lData });
+                    }
+                    resetLoanForm();
+                    renderLoansTable();
+                    hideLoading();
+                    showModal('BERJAYA', 'Pinjaman disimpan (Demo).', 'alert');
+                }, 500);
+                return;
+            }
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                redirect: 'follow', method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: id ? 'update_loan' : 'create_loan', id: id, data: lData })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.success) {
+                    if(id) {
+                        let idx = loansData.findIndex(l => String(l.loan_id) === String(id));
+                        if(idx > -1) loansData[idx] = { loan_id: id, ...lData };
+                    } else loansData.push({ loan_id: res.id, ...lData });
+                    resetLoanForm();
+                    renderLoansTable();
+                } else showModal('RALAT', "Ralat: " + res.error, 'alert');
+                hideLoading();
+            })
+            .catch(err => {
+                showModal('RALAT', "Ralat pelayan.", 'alert');
+                hideLoading();
+            });
+        };
+
+        window.editLoan = (id) => {
+            const loan = loansData.find(l => String(l.loan_id) === String(id));
+            if (!loan) return;
+            document.getElementById('loan-form-title').innerText = "KEMASKINI REKOD PINJAMAN";
+            document.getElementById('loan-id').value = loan.loan_id;
+            ['nama_peminjam', 'tarikh_pinjaman', 'tarikh_pemulangan'].forEach(f => {
+                if(document.getElementById(f)) document.getElementById(f).value = loan[f] || '';
+            });
+            document.getElementById('loan_asset_id').value = String(loan.asset_id);
+            window.scrollTo(0,0);
+        };
+
+        window.deleteLoan = (id) => {
+            showModal('PENGESAHAN', 'Adakah anda pasti memadam rekod pinjaman ini?', 'confirm', (res) => {
+                if(res) {
+                    showLoading('MEMADAM PINJAMAN...');
+                    if(useDemoData) {
+                        setTimeout(() => {
+                            loansData = loansData.filter(l => String(l.loan_id) !== String(id));
+                            renderLoansTable();
+                            hideLoading();
+                        }, 500);
+                        return;
+                    }
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        redirect: 'follow', method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'delete_loan', id: id })
+                    })
+                    .then(r => r.json()).then(r => {
+                        if(r.success) {
+                            loansData = loansData.filter(l => String(l.loan_id) !== String(id));
+                            renderLoansTable();
+                        } else showModal('RALAT', "Ralat: " + r.error, 'alert');
+                        hideLoading();
+                    }).catch(() => { showModal('RALAT', "Ralat", 'alert'); hideLoading(); });
+                }
+            });
+        };
+
+        window.resetLoanForm = () => {
+            document.getElementById('loan-form-title').innerText = "REKOD PINJAMAN BAHARU";
+            document.getElementById('loan-form').reset();
+            document.getElementById('loan-id').value = '';
+        };
+
+        // CHART & UTILITIES
+        function updateChart() {
+            let fNama = (document.getElementById('filter-nama')?.value || '').toLowerCase();
+            let fJenama = (document.getElementById('filter-jenama')?.value || '').toLowerCase();
+            let fModel = (document.getElementById('filter-model')?.value || '').toLowerCase();
+            let fJenis = document.getElementById('filter-jenis')?.value || '';
+            let fTahun = document.getElementById('filter-tahun')?.value || '';
+            let fLokasi = document.getElementById('filter-lokasi')?.value || '';
+            let fStatus = document.getElementById('filter-status')?.value || '';
+
+            let filtered = assetsData.filter(a => {
+                return (String(a.nama_peralatan || '').toLowerCase().includes(fNama)) &&
+                       (String(a.jenama || '').toLowerCase().includes(fJenama)) &&
+                       (String(a.model || '').toLowerCase().includes(fModel)) &&
+                       (fJenis === '' || String(a.jenis_penerimaan || '').toUpperCase() === fJenis) &&
+                       (fTahun === '' || String(a.tahun_perolehan || '') === fTahun) &&
+                       (fLokasi === '' || String(a.lokasi || '').toUpperCase() === fLokasi) &&
+                       (fStatus === '' || String(a.status || '').toUpperCase() === fStatus);
+            });
+
+            let bg = 0, rs = 0, lp = 0;
+            filtered.forEach(a => {
+                let st = String(a.status || '').toUpperCase();
+                if (st === 'BERFUNGSI') bg++;
+                else if (st === 'ROSAK') rs++;
+                else if (st === 'LUPUS') lp++;
+            });
+
+            document.getElementById('total-assets').innerText = filtered.length;
+            document.getElementById('total-functioning').innerText = bg;
+            document.getElementById('total-broken').innerText = rs;
+            document.getElementById('total-disposed').innerText = lp;
+
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            Chart.defaults.font.family = "'Arial', sans-serif";
+            
+            if (statusChartInstance) statusChartInstance.destroy();
+
+            statusChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['BERFUNGSI', 'ROSAK', 'LUPUS'],
                     datasets: [{
-                        data: [statusData['BERFUNGSI'], statusData['ROSAK'], statusData['LUPUS']],
+                        data: [bg, rs, lp],
                         backgroundColor: ['#10b981', '#f43f5e', '#64748b'],
                         borderWidth: 0
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right' } },
-                    cutout: '60%'
+                    responsive: true,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { font: { size: 10, weight: 'bold' } } },
+                        tooltip: { titleFont: { family: "'Arial', sans-serif" }, bodyFont: { family: "'Arial', sans-serif" } }
+                    }
                 }
             });
         }
 
-        window.renderLoans = () => {
-            const tbody = document.getElementById('loan-table-body');
-            tbody.innerHTML = '';
-            
-            const adminCols = document.querySelectorAll('.admin-only-col');
-            adminCols.forEach(col => isAdmin ? col.classList.remove('hidden') : col.classList.add('hidden'));
-
-            if (loans.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${isAdmin ? 8 : 7}" class="text-center py-8 text-slate-500">Tiada rekod pinjaman didaftarkan buat masa ini.</td></tr>`;
-                return;
-            }
-
-            loans.forEach((l, i) => {
-                // Padankan aset ID dalam pinjaman kepada butiran penuh Aset
-                const asset = assets.find(a => String(a.id) === String(l.asset_id)) || { nama_peralatan: 'ASET DIPADAM', jenama: '-', model: '-', nombor_pendaftaran: '-' };
-                const statusColor = l.status_pinjaman === 'Sedang Dipinjam' 
-                    ? 'bg-amber-50 text-amber-700 border-amber-300' 
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-300';
-                
-                // Pengiraan Tempoh Hari Secara Automatik
-                let tempohHari = 0;
-                let tarikhPulangDisplay = l.tarikh_pemulangan || '-';
-                if (l.tarikh_pinjaman) {
-                    const startDate = new Date(l.tarikh_pinjaman);
-                    // Jika belum pulang, kira sehingga hari ini
-                    const endDate = l.tarikh_pemulangan ? new Date(l.tarikh_pemulangan) : new Date(); 
-                    
-                    // Reset masa kepada tengah malam untuk pengiraan hari yang tepat
-                    startDate.setHours(0,0,0,0);
-                    endDate.setHours(0,0,0,0);
-                    
-                    const diffTime = endDate - startDate;
-                    tempohHari = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-                }
-
-                let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                
-                let actionsHTML = '';
-                if (isAdmin) {
-                    actionsHTML = `
-                        <td class="py-2 px-3 text-center admin-only-col border-l border-slate-100">
-                            <div class="flex items-center justify-center gap-3">
-                                <button onclick="editLoan('${l.loan_id}')" class="text-indigo-600 hover:text-indigo-800" title="Kemaskini Pinjaman"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="confirmDeleteLoan('${l.loan_id}')" class="text-rose-600 hover:text-rose-800" title="Padam Pinjaman"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </td>
-                    `;
-                }
-
-                tr.innerHTML = `
-                    <td class="py-2 px-3 text-center text-slate-500">${i + 1}</td>
-                    <td class="py-2 px-3 text-black">${escapeHTML(l.nama_peminjam)}</td>
-                    <td class="py-2 px-3">
-                        <div class="text-slate-900">${escapeHTML(asset.nama_peralatan)}</div>
-                        <div class="text-[9px] text-slate-500">${escapeHTML(asset.jenama || '-')} <span class="text-slate-400 mx-1">/</span> ${escapeHTML(asset.model || '-')}</div>
-                    </td>
-                    <td class="py-2 px-3 text-slate-700">${escapeHTML(asset.nombor_pendaftaran) || escapeHTML(asset.nombor_siri) || '-'}</td>
-                    <td class="py-2 px-3 text-center text-slate-800">${l.tarikh_pinjaman}</td>
-                    <td class="py-2 px-3 text-center">
-                        <div class="text-slate-800">${tarikhPulangDisplay}</div>
-                        <div class="text-[9px] text-indigo-600 mt-0.5 tracking-wider">${tempohHari} HARI</div>
-                    </td>
-                    <td class="py-2 px-3 text-center">
-                        <span class="px-2 py-1 rounded-[4px] text-[9px] uppercase border ${statusColor}">${l.status_pinjaman}</span>
-                    </td>
-                    ${actionsHTML}
-                `;
-                tbody.appendChild(tr);
-            });
-        };
-
-        window.openLoanModal = () => {
-            document.getElementById('loan-form-id').value = '';
-            document.getElementById('form-loan').reset();
-            
-            const select = document.getElementById('loan-asset-id');
-            select.innerHTML = '<option value="">Pilih Harta Modal...</option>';
-            assets.forEach(a => {
-                const jenama = a.jenama ? ` - ${escapeHTML(a.jenama)}` : '';
-                const model = a.model ? ` ${escapeHTML(a.model)}` : '';
-                const siri = a.nombor_siri ? ` (SN: ${escapeHTML(a.nombor_siri)})` : '';
-                select.innerHTML += `<option value="${a.id}">${escapeHTML(a.nama_peralatan)}${jenama}${model}${siri}</option>`;
-            });
-
-            document.getElementById('modal-loan').classList.remove('hidden');
-            document.getElementById('modal-loan').classList.add('flex');
-            document.getElementById('btn-submit-loan').innerHTML = '<i class="fa-solid fa-save"></i> Simpan';
-            updateLoanStatus(); // Tetapkan status awal
-        };
-
-        window.updateLoanStatus = () => {
-            const tp = document.getElementById('loan-tarikh-pulang').value;
-            const statusSelect = document.getElementById('loan-status');
-            
-            if (tp) {
-                statusSelect.value = 'Telah Dipulangkan';
-                statusSelect.classList.remove('text-amber-600');
-                statusSelect.classList.add('text-emerald-600');
-            } else {
-                statusSelect.value = 'Sedang Dipinjam';
-                statusSelect.classList.remove('text-emerald-600');
-                statusSelect.classList.add('text-amber-600');
-            }
-        };
-
-        window.handleLoanSubmit = async (e) => {
-            e.preventDefault();
-            if (!isAdmin) return;
-
-            const id = document.getElementById('loan-form-id').value;
-            const tarikhPulang = document.getElementById('loan-tarikh-pulang').value;
-            
-            const data = {
-                asset_id: document.getElementById('loan-asset-id').value,
-                nama_peminjam: document.getElementById('loan-nama').value,
-                tarikh_pinjaman: document.getElementById('loan-tarikh-pinjam').value,
-                tarikh_pemulangan: tarikhPulang,
-                status_pinjaman: tarikhPulang ? 'Telah Dipulangkan' : 'Sedang Dipinjam',
-                timestamp: Date.now()
-            };
-
-            const btn = document.getElementById('btn-submit-loan');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-            btn.disabled = true;
-
-            if (isDemoMode) {
-                setTimeout(() => {
-                    if (id) {
-                        const idx = loans.findIndex(l => l.loan_id === id);
-                        if(idx > -1) loans[idx] = {loan_id: id, ...data};
-                        showMsg("Berjaya", "Rekod pinjaman dikemaskini (Mod Lokal).", "success");
-                    } else {
-                        loans.unshift({loan_id: String(Date.now()), ...data});
-                        showMsg("Berjaya", "Pinjaman baru direkodkan (Mod Lokal).", "success");
-                    }
-                    renderLoans();
-                    closeModal('modal-loan');
-                    btn.disabled = false;
-                }, 500);
-                return;
-            }
-
-            try {
-                const payload = id ? { action: 'update_loan', id: id, data: data } : { action: 'create_loan', data: data };
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    redirect: "follow",
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await res.json();
-                if(result.success) {
-                    if (id) {
-                        const idx = loans.findIndex(l => l.loan_id === id);
-                        if(idx > -1) loans[idx] = {loan_id: id, ...data};
-                    } else {
-                        loans.unshift({loan_id: result.id, ...data});
-                    }
-                    renderLoans();
-                    closeModal('modal-loan');
-                    showMsg("Berjaya", "Rekod pinjaman berjaya disimpan ke pangkalan data.", "success");
-                } else {
-                    throw new Error(result.error);
-                }
-            } catch (error) {
-                console.error("Error saving loan:", error);
-                showMsg("Ralat", "Gagal menyimpan data ke Sheets.", "error");
-            } finally {
-                btn.disabled = false;
-            }
-        };
-
-        window.editLoan = (id) => {
-            const loan = loans.find(l => l.loan_id === id);
-            if (!loan) return;
-
-            openLoanModal();
-            document.getElementById('loan-form-id').value = id;
-            document.getElementById('loan-asset-id').value = loan.asset_id;
-            document.getElementById('loan-nama').value = loan.nama_peminjam;
-            document.getElementById('loan-tarikh-pinjam').value = loan.tarikh_pinjaman;
-            document.getElementById('loan-tarikh-pulang').value = loan.tarikh_pemulangan || '';
-            updateLoanStatus();
-            document.getElementById('btn-submit-loan').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Kemaskini';
-        };
-
-        window.confirmDeleteLoan = (id) => {
-            const loan = loans.find(l => l.loan_id === id);
-            if(!loan) return;
-            
-            const modalHTML = `
-                <div id="modal-confirm-loan" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-                    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
-                        <div class="text-4xl mb-4 text-rose-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-2">Padam Rekod Pinjaman?</h3>
-                        <p class="text-sm text-slate-600 mb-6">Adakah anda pasti memadam rekod pinjaman bagi <b>${escapeHTML(loan.nama_peminjam)}</b>? Ia akan dipadam selamanya.</p>
-                        <div class="flex gap-2">
-                            <button onclick="document.getElementById('modal-confirm-loan').remove()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-medium">Batal</button>
-                            <button onclick="executeDeleteLoan('${id}')" id="btn-delete-loan" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-md font-medium">Ya, Padam</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-        };
-
-        window.executeDeleteLoan = async (id) => {
-            const btn = document.getElementById('btn-delete-loan');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
-            if (isDemoMode) {
-                setTimeout(() => {
-                    loans = loans.filter(l => l.loan_id !== id);
-                    renderLoans();
-                    document.getElementById('modal-confirm-loan').remove();
-                }, 500);
-                return;
-            }
-
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    redirect: "follow",
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: 'delete_loan', id: id })
-                });
-                
-                const result = await res.json();
-                document.getElementById('modal-confirm-loan').remove();
-
-                if(result.success) {
-                    loans = loans.filter(l => l.loan_id !== id);
-                    renderLoans();
-                    showMsg("Berjaya", "Rekod pinjaman telah dipadam.", "success");
-                } else {
-                    throw new Error(result.error);
-                }
-            } catch (error) {
-                document.getElementById('modal-confirm-loan')?.remove();
-                showMsg("Ralat", "Gagal memadam rekod.", "error");
-            }
-        };
-
-        window.handleFormSubmit = async (e) => {
-            e.preventDefault();
-            if (!isAdmin) {
-                showMsg("Akses Ditolak", "Hanya Admin boleh mendaftar harta modal.", "error");
-                return;
-            }
-
-            const id = document.getElementById('form-id').value;
-            const data = {
-                nama_peralatan: document.getElementById('inp-nama').value,
-                jenis_harta: document.getElementById('inp-jenis').value,
-                model: document.getElementById('inp-model').value,
-                kuantiti: parseInt(document.getElementById('inp-kuantiti').value),
-                tahun_perolehan: parseInt(document.getElementById('inp-tahun').value),
-                lokasi: document.getElementById('inp-lokasi').value,
-                
-                jenama: document.getElementById('inp-jenama').value,
-                tarikh: document.getElementById('inp-tarikh').value,
-                nombor_siri: document.getElementById('inp-siri').value,
-                nombor_pendaftaran: document.getElementById('inp-pendaftaran').value,
-                syarikat_pembekal: document.getElementById('inp-pembekal').value,
-                harga_perolehan: parseFloat(document.getElementById('inp-harga').value || 0),
-                penerima: document.getElementById('inp-penerima').value,
-                pengesah: document.getElementById('inp-pengesah').value,
-                
-                status: document.getElementById('inp-status').value,
-                jenis_penerimaan: document.getElementById('inp-jenispenerimaan').value,
-                catatan: document.getElementById('inp-catatan').value,
-                timestamp: Date.now()
-            };
-
-            const btn = document.getElementById('btn-submit-form');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-            btn.disabled = true;
-
-            // Jika dalam Mod Demo, simpan ke array lokal sahaja
-            if (isDemoMode) {
-                setTimeout(() => {
-                    if (id) {
-                        const idx = assets.findIndex(a => a.id === id);
-                        if(idx > -1) assets[idx] = {id: id, ...data};
-                        showMsg("Berjaya (Demo Mode)", "Rekod harta modal telah dikemaskini secara lokal.", "success");
-                    } else {
-                        assets.unshift({id: String(Date.now()), ...data});
-                        showMsg("Berjaya (Demo Mode)", "Harta modal baru telah didaftarkan secara lokal.", "success");
-                    }
-                    renderApp();
-                    clearForm();
-                    switchTab('dashboard');
-                    btn.innerHTML = '<i class="fa-solid fa-save"></i> Simpan Harta Modal';
-                    btn.disabled = false;
-                }, 500);
-                return;
-            }
-
-            try {
-                const payload = id ? { action: 'update', id: id, data: data } : { action: 'create', data: data };
-                
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    redirect: "follow",
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await res.json();
-                
-                if(result.success) {
-                    if (id) {
-                        const idx = assets.findIndex(a => a.id === id);
-                        if(idx > -1) assets[idx] = {id: id, ...data};
-                        showMsg("Berjaya", "Rekod harta modal telah dikemaskini.", "success");
-                    } else {
-                        assets.unshift({id: result.id, ...data});
-                        showMsg("Berjaya", "Harta modal baru telah didaftarkan.", "success");
-                    }
-                    renderApp();
-                    clearForm();
-                    switchTab('dashboard');
-                } else {
-                    throw new Error(result.error || "Ralat Pangkalan Data");
-                }
-
-            } catch (error) {
-                console.error("Error saving:", error);
-                showMsg("Ralat", "Gagal menyimpan data ke Google Sheets.", "error");
-            } finally {
-                btn.innerHTML = '<i class="fa-solid fa-save"></i> Simpan Harta Modal';
-                btn.disabled = false;
-            }
-        };
-
-        window.editAsset = (id) => {
-            const asset = assets.find(a => a.id === id);
-            if (!asset) return;
-
-            document.getElementById('form-id').value = id;
-            document.getElementById('inp-nama').value = asset.nama_peralatan || '';
-            document.getElementById('inp-jenis').value = asset.jenis_harta || '';
-            document.getElementById('inp-model').value = asset.model || '';
-            document.getElementById('inp-kuantiti').value = asset.kuantiti || 1;
-            document.getElementById('inp-tahun').value = asset.tahun_perolehan || currentYear;
-            document.getElementById('inp-lokasi').value = asset.lokasi || '';
-            
-            document.getElementById('inp-jenama').value = asset.jenama || '';
-            document.getElementById('inp-tarikh').value = asset.tarikh || '';
-            document.getElementById('inp-siri').value = asset.nombor_siri || '';
-            document.getElementById('inp-pendaftaran').value = asset.nombor_pendaftaran || '';
-            document.getElementById('inp-pembekal').value = asset.syarikat_pembekal || '';
-            document.getElementById('inp-harga').value = asset.harga_perolehan || '';
-            document.getElementById('inp-penerima').value = asset.penerima || '';
-            document.getElementById('inp-pengesah').value = asset.pengesah || '';
-            
-            document.getElementById('inp-status').value = asset.status || 'Berfungsi';
-            document.getElementById('inp-jenispenerimaan').value = asset.jenis_penerimaan || 'PEMBELIAN';
-            document.getElementById('inp-catatan').value = asset.catatan || '';
-
-            switchTab('registration');
-            document.getElementById('btn-submit-form').innerHTML = '<i class="fa-solid fa-pen-to-square font-bold"></i> Kemaskini Harta';
-        };
-
-        window.confirmDelete = (id) => {
-            const asset = assets.find(a => a.id === id);
-            if(!asset) return;
-
-            const confirmModalHTML = `
-                <div id="modal-confirm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-                    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
-                        <div class="text-4xl mb-4 text-rose-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-2">Padam Harta Modal?</h3>
-                        <p class="text-sm text-slate-600 mb-6">Adakah anda pasti untuk memadam <b>${escapeHTML(asset.nama_peralatan)}</b>? Tindakan ini akan dipadam terus dari Google Sheets.</p>
-                        <div class="flex gap-2">
-                            <button onclick="document.getElementById('modal-confirm').remove()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-medium">Batal</button>
-                            <button onclick="executeDelete('${id}')" id="btn-confirm-delete" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-md font-medium">Ya, Padam</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', confirmModalHTML);
-        };
-
-        window.executeDelete = async (id) => {
-            const btn = document.getElementById('btn-confirm-delete');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
-            // Jika dalam Mod Demo, padam dari array lokal sahaja
-            if (isDemoMode) {
-                setTimeout(() => {
-                    assets = assets.filter(a => a.id !== id);
-                    renderApp();
-                    document.getElementById('modal-confirm').remove();
-                    showMsg("Berjaya (Demo Mode)", "Rekod telah dipadam secara lokal.", "success");
-                }, 500);
-                return;
-            }
-
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    redirect: "follow",
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: 'delete', id: id })
-                });
-                
-                const result = await res.json();
-                document.getElementById('modal-confirm').remove();
-
-                if(result.success) {
-                    assets = assets.filter(a => a.id !== id);
-                    renderApp();
-                    showMsg("Berjaya", "Rekod telah dipadam dari Sheets.", "success");
-                } else {
-                    throw new Error(result.error);
-                }
-            } catch (error) {
-                console.error("Delete error:", error);
-                document.getElementById('modal-confirm')?.remove();
-                showMsg("Ralat", "Gagal memadam rekod.", "error");
-            }
-        };
-
-        window.clearForm = () => {
-            document.getElementById('form-id').value = '';
-            document.getElementById('form-registration').reset();
-            document.getElementById('inp-tahun').value = currentYear;
-            document.getElementById('btn-submit-form').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Harta Modal';
-        };
-
-        window.toggleAdminLogin = () => {
+        window.checkAdmin = () => {
             if (isAdmin) {
                 isAdmin = false;
-                document.getElementById('icon-admin').className = "fa-solid fa-lock text-slate-500";
-                document.getElementById('text-admin').innerText = "Log Masuk";
-                document.getElementById('btn-admin').classList.remove('bg-emerald-600', 'hover:bg-emerald-500', 'border-emerald-500', 'text-white');
-                document.getElementById('btn-admin').classList.add('bg-slate-800', 'hover:bg-slate-700', 'border-slate-600', 'text-slate-300');
-                renderTable(); 
-                renderLoans(); // Refresh loan table to hide actions
-                if(document.getElementById('view-registration').classList.contains('hidden') === false) {
-                    document.getElementById('admin-overlay').classList.remove('hidden');
-                }
-            } else {
-                document.getElementById('admin-password').value = '';
-                document.getElementById('admin-error').classList.add('hidden');
-                document.getElementById('modal-admin').classList.remove('hidden');
-                document.getElementById('modal-admin').classList.add('flex');
-            }
-        };
-
-        window.verifyAdmin = () => {
-            const pass = document.getElementById('admin-password').value;
-            if (pass === adminPass) {
-                isAdmin = true;
-                closeModal('modal-admin');
-                document.getElementById('icon-admin').className = "fa-solid fa-unlock text-white";
-                document.getElementById('text-admin').innerText = "Admin (Keluar)";
-                document.getElementById('btn-admin').classList.remove('bg-slate-800', 'hover:bg-slate-700', 'border-slate-600', 'text-slate-300');
-                document.getElementById('btn-admin').classList.add('bg-emerald-600', 'hover:bg-emerald-500', 'border-emerald-500', 'text-white');
-                renderTable(); 
-                renderLoans(); // Refresh loan table to show actions
-                document.getElementById('admin-overlay').classList.add('hidden');
-            } else {
-                document.getElementById('admin-error').classList.remove('hidden');
-            }
-        };
-
-        window.closeModal = (id) => {
-            document.getElementById(id).classList.add('hidden');
-            document.getElementById(id).classList.remove('flex');
-        };
-
-        window.showMsg = (title, body, type="info") => {
-            const icon = document.getElementById('msg-icon');
-            if(type === 'success') icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i>';
-            else if(type === 'error') icon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-500"></i>';
-            else icon.innerHTML = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
-            
-            document.getElementById('msg-title').innerText = title;
-            document.getElementById('msg-body').innerText = body;
-            
-            const modal = document.getElementById('modal-msg');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        window.openPrintModal = () => {
-            document.getElementById('modal-print').classList.remove('hidden');
-            document.getElementById('modal-print').classList.add('flex');
-        };
-
-        window.executePrint = () => {
-            const loc = document.getElementById('print-lokasi').value;
-            closeModal('modal-print');
-
-            let printList = assets;
-            let subtitle = "KESELURUHAN LOKASI";
-            if (loc !== 'ALL') {
-                printList = assets.filter(a => a.lokasi === loc);
-                subtitle = `LOKASI: ${loc.toUpperCase()}`;
-            }
-
-            document.getElementById('print-subtitle').innerText = subtitle;
-            const tbody = document.getElementById('print-table-body');
-            tbody.innerHTML = '';
-
-            printList.forEach((a, i) => {
-                const age = currentYear - parseInt(a.tahun_perolehan);
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="text-align: center;">${i + 1}</td>
-                    <td>${escapeHTML(a.nama_peralatan)}</td>
-                    <td>${escapeHTML(a.jenama || '-')} <br> ${escapeHTML(a.model)}</td>
-                    <td>SN: ${escapeHTML(a.nombor_siri || '-')} <br> Reg: ${escapeHTML(a.nombor_pendaftaran || '-')}</td>
-                    <td>${escapeHTML(a.lokasi)}</td>
-                    <td style="text-align: center;">${a.kuantiti}</td>
-                    <td style="text-align: center;">${a.tahun_perolehan} (${age} thn)</td>
-                    <td style="text-align: center;">${a.status}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            setTimeout(() => { window.print(); }, 300);
-        };
-
-        window.exportToCSV = () => {
-            if(assets.length === 0) {
-                showMsg("Tiada Data", "Tiada data untuk dieksport.", "error");
-                return;
-            }
-            const headers = [
-                "Nama Peralatan", "Jenis Harta", "Jenama", "Model", "Kuantiti", 
-                "Tahun Perolehan", "Tarikh", "Nombor Siri", "Nombor Pendaftaran",
-                "Syarikat Pembekal", "Harga Perolehan (RM)", "Penerima", "Pengesah",
-                "Status", "Jenis Penerimaan", "Lokasi", "Catatan"
-            ];
-            
-            let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
-
-            assets.forEach(a => {
-                let row = [
-                    a.nama_peralatan, a.jenis_harta, a.jenama, a.model, a.kuantiti,
-                    a.tahun_perolehan, a.tarikh, a.nombor_siri, a.nombor_pendaftaran,
-                    a.syarikat_pembekal, a.harga_perolehan, a.penerima, a.pengesah,
-                    a.status, a.jenis_penerimaan, a.lokasi, a.catatan
-                ].map(item => `"${String(item || '').replace(/"/g, '""')}"`);
+                document.getElementById('btn-admin').innerHTML = '<i class="fa-solid fa-lock mr-1"></i> MOD ADMIN';
+                document.getElementById('btn-admin').classList.replace('bg-rose-100', 'bg-slate-200');
+                document.getElementById('btn-admin').classList.replace('text-rose-700', 'text-slate-700');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
                 
-                csvContent += row.join(",") + "\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Daftar_Harta_Modal_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+                if(!document.getElementById('registration').classList.contains('hidden')) switchTab('dashboard');
+                showModal('MAKLUMAN', 'Mod Admin telah ditutup.', 'alert');
+            } else {
+                showModal('KATA LALUAN', 'Sila masukkan kata laluan Admin:', 'prompt', (pass) => {
+                    if (pass === "SkaiTba0078#HARTA") {
+                        isAdmin = true;
+                        document.getElementById('btn-admin').innerHTML = '<i class="fa-solid fa-unlock mr-1"></i> ADMIN AKTIF';
+                        document.getElementById('btn-admin').classList.replace('bg-slate-200', 'bg-rose-100');
+                        document.getElementById('btn-admin').classList.replace('text-slate-700', 'text-rose-700');
+                        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                        showModal('BERJAYA', 'Mod Admin diaktifkan.', 'alert');
+                    } else if (pass !== null) {
+                        showModal('RALAT', 'Kata laluan salah!', 'alert');
+                    }
+                });
+            }
         };
 
         function escapeHTML(str) {
-            if(str === null || str === undefined) return '';
-            return String(str).replace(/[&<>'"]/g, 
-                tag => ({
-                    '&': '&amp;', '<': '&lt;', '>': '&gt;',
-                    "'": '&#39;', '"': '&quot;'
-                }[tag])
-            );
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
         }
 
-        document.getElementById('inp-tahun').value = currentYear;
+        // INIT
+        fetchData();
     </script>
 </body>
 </html>
