@@ -1198,11 +1198,11 @@
             document.getElementById('inp-pengesah').value = asset.pengesah || '';
             
             document.getElementById('inp-status').value = asset.status || 'Berfungsi';
-            document.getElementById('inp-jenispenerimaan').value = asset.jenis_penerimaan || 'Belian Terus';
+            document.getElementById('inp-jenispenerimaan').value = asset.jenis_penerimaan || 'PEMBELIAN';
             document.getElementById('inp-catatan').value = asset.catatan || '';
 
             switchTab('registration');
-            document.getElementById('btn-submit-form').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Kemaskini Harta';
+            document.getElementById('btn-submit-form').innerHTML = '<i class="fa-solid fa-pen-to-square font-bold"></i> Kemaskini Harta';
         };
 
         window.confirmDelete = (id) => {
